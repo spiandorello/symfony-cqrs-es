@@ -1,0 +1,34 @@
+name: pr
+
+on:
+  pull_request:
+    branches:
+      - symfony-5
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Code build, lint and tests
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Build
+      run: make env=ci start;make env=ci xoff
+
+    - name: DDD LAYERS
+      run: make env=ci layer
+
+    - name: DB Schema validation
+      run: make env=ci schema-validate
+
+    - name: Static tools (analyzers)
+      run: make env=ci cs-check;make env=ci phpstan;make env=ci layer;make env=ci psalm
+
+    - name: Tests
+      run: make env=ci xon;make env=ci conf="--coverage-clover build/logs/clover.xml" phpunit
+
+    - name: ARTIFACT
+      run: make env=ci artifact
+
+    - name: Coveralls
+      run: make env=ci coverage

@@ -1,0 +1,44 @@
+version: '3.7'
+
+services:
+
+  nginx:
+    ports:
+      - "80:80"
+
+  php:
+    ports:
+      - "2323:22"
+#      - "9003:9003"
+    # Allows to debug php script run inside PHP container
+    environment:
+      PHP_IDE_CONFIG: serverName=es.local
+  blackfire:
+    image: blackfire/blackfire
+    env_file:
+      - .env.blackfire
+    environment:
+      BLACKFIRE_LOG_LEVEL: 4
+
+  mysql:
+    ports:
+      - "3306:3306"
+
+  rmq:
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.11.0
+    ports:
+      - 5601:5601
+    volumes:
+      - "./etc/dev/kibana/config:/usr/share/kibana/config/kibana.yml"
+
+  elasticsearch:
+    ports:
+      - "9200:9200"
+
+volumes:
+  db_data:

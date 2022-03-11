@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+
+  nginx:
+    ports:
+      - "80:80"
+
+  php:
+    ports:
+      - "2323:22"
+    # Allows to debug php script run inside PHP container
+    environment:
+      PHP_IDE_CONFIG: serverName=es.local
+      # Prod mode doesn't load .env file, remember to add here your new required env vars!
+      APP_ENV: "prod"
+      APP_DEBUG: 0
+      APP_SECRET: c7375619ac26c8671e52279c31c7f157
+      JWT_SECRET_KEY: '%kernel.project_dir%/config/packages/jwt/private.pem'
+      JWT_PUBLIC_KEY: '%kernel.project_dir%/config/packages/jwt/public.pem'
+      JWT_PASSPHRASE: productionfakesecret
+      JWT_TTL: 604800
+      MESSENGER_TRANSPORT_DSN: amqp://guest:guest@rmq:5672/%2f/messages
+
+  workers:
+    environment:
+      PHP_IDE_CONFIG: serverName=es.local
+      APP_ENV: "prod"
+      APP_DEBUG: 0
+      APP_SECRET: c7375619ac26c8671e52279c31c7f157
+      JWT_SECRET_KEY: '%kernel.project_dir%/config/packages/jwt/private.pem'
+      JWT_PUBLIC_KEY: '%kernel.project_dir%/config/packages/jwt/public.pem'
+      JWT_PASSPHRASE: productionfakesecret
+      JWT_TTL: 604800
+      MESSENGER_TRANSPORT_DSN: amqp://guest:guest@rmq:5672/%2f/messages
+
+  mysql:
+    ports:
+      - "3306:3306"
+
+  rmq:
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.1
+    ports:
+      - 5601:5601
+    volumes:
+      - "./etc/dev/kibana/config:/usr/share/kibana/config/kibana.yml"
+
+  elasticsearch:
+    ports:
+      - "9200:9200"
+
+volumes:
+  db_data:

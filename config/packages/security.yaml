@@ -1,0 +1,61 @@
+security:
+    enable_authenticator_manager: true
+
+    password_hashers:
+        hasher:
+            id: App\User\Infrastructure\Auth\PasswordHasher
+
+    providers:
+        users:
+            id: 'App\User\Infrastructure\Auth\AuthProvider'
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        api_healthz:
+            pattern:  ^/api/healthz
+            stateless: true
+
+        api_doc:
+            pattern:  ^/api/doc
+            stateless: true
+
+        api_auth:
+            pattern:  ^/api/auth
+            stateless: true
+
+        api_signup:
+            pattern:  ^/api/signup
+            stateless: true
+
+        api_secured:
+            pattern:  ^/api
+            provider: users
+            stateless: true
+            guard:
+              authenticators:
+                - lexik_jwt_authentication.jwt_token_authenticator
+
+        secured_area:
+            pattern: ^/
+            provider: users
+            custom_authenticators:
+            - 'App\User\Infrastructure\Auth\Guard\LoginAuthenticator'
+            form_login:
+              login_path: /sign-in
+              check_path: sign-in
+            entry_point: form_login
+            logout:
+              path: /logout
+              target: /
+
+    access_control:
+        - { path: ^/profile,      roles: ROLE_USER }
+        - { path: ^/api/healthz, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/auth,    roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/signup,  roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/doc,     roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/,        roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/,            roles: IS_AUTHENTICATED_ANONYMOUSLY }
